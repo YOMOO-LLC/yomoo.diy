@@ -1,0 +1,58 @@
+{
+  "mcpServers": {
+    "fetch": {
+      "command": "npx",
+      "args": ["-y", "u/kazuph/mcp-fetch"],
+      "env": {}
+    },
+    "Context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "env": {}
+    },
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/oraios/serena",
+        "serena-mcp-server",
+        "--context",
+        "ide-assistant",
+        "--project",
+        "/Users/yhfy2006/Documents/GitHub/aura-supabass"
+      ],
+      "env": {}
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"],
+      "env": {}
+    },
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--read-only",
+        "--project-ref=pjfufdtxwjwsuadriybt"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "sbp_ee4d66f5fd2db1241584c350d12da7c368a6e6e9"
+      }
+    },
+    "mcp-sequentialthinking-tools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-sequentialthinking-tools"]
+    },
+    "@21st-dev/magic": {
+      "command": "npx",
+      "args": ["-y", "@21st-dev/magic@latest", "API_KEY=659a38039d84599a5a7a7aa29bb033bc8d89b6bd3a0a15bb9ce3605395b6ac7c"]
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "puppeteer-mcp-server"],
+      "env": {}
+    }
+  }
+}
