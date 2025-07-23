@@ -34,8 +34,5 @@
     "**/.server/**/*.tsx",
     "**/.client/**/*.ts",
     "**/.client/**/*.tsx"
-  ],
-  "exclude": [
-    "functions/**/*"
   ]
 }
