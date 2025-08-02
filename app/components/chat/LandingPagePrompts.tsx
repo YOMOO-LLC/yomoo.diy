@@ -50,8 +50,16 @@ export function LandingPagePrompts({ sendMessage }: LandingPagePromptsProps) {
       className="relative flex flex-col gap-6 w-full max-w-4xl mx-auto flex justify-center mt-6"
     >
       <div className="text-center">
-        <h3 className="text-lg font-semibold text-bolt-elements-textPrimary mb-2">选择您的业务类型快速开始</h3>
-        <p className="text-sm text-bolt-elements-textSecondary">点击下方选项，AI 将为您量身定制专业的 Landing Page</p>
+        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500/10 to-purple-600/10 px-4 py-2 rounded-full mb-4">
+          <span className="text-2xl">🚀</span>
+          <span className="text-sm font-medium text-bolt-elements-textPrimary">Landing Page 创建模式</span>
+        </div>
+        <h3 className="text-xl font-bold text-bolt-elements-textPrimary mb-3">AI 为您打造专业级 Landing Page</h3>
+        <p className="text-sm text-bolt-elements-textSecondary max-w-2xl mx-auto leading-relaxed">
+          选择您的业务类型，AI 将通过智能对话收集您的需求，然后生成完整的、可预览的专业网站项目。
+          <br />
+          <span className="text-xs opacity-75 mt-1 block">包含 HTML、CSS、JavaScript，支持响应式设计和实时预览</span>
+        </p>
       </div>
 
       <div

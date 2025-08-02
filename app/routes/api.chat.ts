@@ -60,6 +60,7 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
 
   // Debug: Log promptId for Landing Page debugging
   console.log(`🎯 API Chat Debug: promptId = "${promptId}", messages count = ${messages.length}`);
+
   if (promptId?.includes('landing-page')) {
     console.log(`🏠 Landing Page API Call: Using prompt "${promptId}"`);
   }

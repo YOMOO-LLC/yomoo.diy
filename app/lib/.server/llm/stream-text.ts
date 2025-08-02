@@ -124,7 +124,7 @@ export async function streamText(props: {
   // Debug: Log prompt selection for Landing Page debugging
   const selectedPromptId = promptId || 'default';
   console.log(`🎨 Stream Text Debug: Using promptId = "${selectedPromptId}"`);
-  
+
   let systemPrompt =
     PromptLibrary.getPropmtFromLibrary(selectedPromptId, {
       cwd: WORK_DIR,

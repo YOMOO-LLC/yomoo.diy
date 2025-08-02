@@ -304,10 +304,10 @@ export const ChatImpl = memo(
         console.log(`📊 Phase Detection Debug:`, {
           messageCount: messages.length,
           shouldGenerate: landingPagePhase === 'generate',
-          recentMessages: messages.slice(-3).map(m => ({
+          recentMessages: messages.slice(-3).map((m) => ({
             role: m.role,
-            contentPreview: m.content?.substring(0, 100) + '...'
-          }))
+            contentPreview: m.content?.substring(0, 100) + '...',
+          })),
         });
       }
     }, [messages, isLandingPageMode, currentPromptId]);

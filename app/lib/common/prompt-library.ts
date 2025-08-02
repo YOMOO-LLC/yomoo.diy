@@ -51,7 +51,7 @@ export class PromptLibrary {
     'landing-page-generator': {
       label: 'Landing Page Generator',
       description: 'Generate professional Landing Pages based on conversation history',
-      get: () => getLandingPagePrompt(),
+      get: (options) => getLandingPagePrompt(options.cwd, options.supabase, options.designScheme),
     },
   };
   static getList() {
