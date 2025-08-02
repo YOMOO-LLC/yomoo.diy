@@ -58,6 +58,12 @@ async function chatAction({ context, request }: ActionFunctionArgs) {
       maxLLMSteps: number;
     }>();
 
+  // Debug: Log promptId for Landing Page debugging
+  console.log(`🎯 API Chat Debug: promptId = "${promptId}", messages count = ${messages.length}`);
+  if (promptId?.includes('landing-page')) {
+    console.log(`🏠 Landing Page API Call: Using prompt "${promptId}"`);
+  }
+
   const cookieHeader = request.headers.get('Cookie');
   const apiKeys = JSON.parse(parseCookies(cookieHeader || '').apiKeys || '{}');
   const providerSettings: Record<string, IProviderSetting> = JSON.parse(

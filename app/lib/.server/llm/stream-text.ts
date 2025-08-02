@@ -121,8 +121,12 @@ export async function streamText(props: {
     `Max tokens for model ${modelDetails.name} is ${dynamicMaxTokens} based on ${modelDetails.maxTokenAllowed} or ${MAX_TOKENS}`,
   );
 
+  // Debug: Log prompt selection for Landing Page debugging
+  const selectedPromptId = promptId || 'default';
+  console.log(`🎨 Stream Text Debug: Using promptId = "${selectedPromptId}"`);
+  
   let systemPrompt =
-    PromptLibrary.getPropmtFromLibrary(promptId || 'default', {
+    PromptLibrary.getPropmtFromLibrary(selectedPromptId, {
       cwd: WORK_DIR,
       allowedHtmlElements: allowedHTMLElements,
       modificationTagName: MODIFICATIONS_TAG_NAME,
@@ -133,6 +137,11 @@ export async function streamText(props: {
         credentials: options?.supabaseConnection?.credentials || undefined,
       },
     }) ?? getSystemPrompt();
+
+  if (selectedPromptId.includes('landing-page')) {
+    console.log(`🏠 Landing Page Prompt Selected: "${selectedPromptId}"`);
+    console.log(`📝 System Prompt Preview: ${systemPrompt.substring(0, 200)}...`);
+  }
 
   if (chatMode === 'build' && contextFiles && contextOptimization) {
     const codeContext = createFilesContext(contextFiles, true);

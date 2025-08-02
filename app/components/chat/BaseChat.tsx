@@ -16,6 +16,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import styles from './BaseChat.module.scss';
 import { ImportButtons } from '~/components/chat/chatExportAndImport/ImportButtons';
 import { ExamplePrompts } from '~/components/chat/ExamplePrompts';
+import LandingPagePrompts from '~/components/chat/LandingPagePrompts';
 import GitCloneButton from './GitCloneButton';
 import type { ProviderInfo } from '~/types/model';
 import StarterTemplates from './StarterTemplates';
@@ -81,6 +82,7 @@ interface BaseChatProps {
   selectedElement?: ElementInfo | null;
   setSelectedElement?: (element: ElementInfo | null) => void;
   addToolResult?: ({ toolCallId, result }: { toolCallId: string; result: any }) => void;
+  isLandingPageMode?: boolean;
 }
 
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
@@ -130,6 +132,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       addToolResult = () => {
         throw new Error('addToolResult not implemented');
       },
+      isLandingPageMode = false,
     },
     ref,
   ) => {
@@ -476,7 +479,20 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 </div>
               )}
               <div className="flex flex-col gap-5">
+                {!chatStarted && isLandingPageMode && (
+                  <LandingPagePrompts
+                    sendMessage={(event, messageInput) => {
+                      if (isStreaming) {
+                        handleStop?.();
+                        return;
+                      }
+
+                      handleSendMessage?.(event, messageInput);
+                    }}
+                  />
+                )}
                 {!chatStarted &&
+                  !isLandingPageMode &&
                   ExamplePrompts((event, messageInput) => {
                     if (isStreaming) {
                       handleStop?.();
@@ -485,7 +501,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
                     handleSendMessage?.(event, messageInput);
                   })}
-                {!chatStarted && <StarterTemplates />}
+                {!chatStarted && !isLandingPageMode && <StarterTemplates />}
               </div>
             </div>
           </div>

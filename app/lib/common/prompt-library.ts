@@ -1,6 +1,7 @@
 import { getSystemPrompt } from './prompts/prompts';
 import optimized from './prompts/optimized';
 import { getFineTunedPrompt } from './prompts/new-prompt';
+import { getLandingPageGuidePrompt, getLandingPagePrompt } from './prompts/landing-page-guide';
 import type { DesignScheme } from '~/types/design-scheme';
 
 export interface PromptOptions {
@@ -41,6 +42,16 @@ export class PromptLibrary {
       label: 'Optimized Prompt (experimental)',
       description: 'An Experimental version of the prompt for lower token usage',
       get: (options) => optimized(options),
+    },
+    'landing-page-guide': {
+      label: 'Landing Page Guide',
+      description: 'AI guide for collecting Landing Page requirements through conversation',
+      get: () => getLandingPageGuidePrompt(),
+    },
+    'landing-page-generator': {
+      label: 'Landing Page Generator',
+      description: 'Generate professional Landing Pages based on conversation history',
+      get: () => getLandingPagePrompt(),
     },
   };
   static getList() {

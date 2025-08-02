@@ -124,6 +124,17 @@ export const ChatImpl = memo(
     const [imageDataList, setImageDataList] = useState<string[]>([]);
     const [searchParams, setSearchParams] = useSearchParams();
     const [fakeLoading, setFakeLoading] = useState(false);
+
+    // Landing Page 模式检测
+    const isLandingPageMode = searchParams.get('mode') === 'landing-page';
+
+    // 会话状态检测
+    const sessionState = {
+      exists: initialMessages.length > 0,
+      hasMessages: initialMessages.length > 0,
+      isLandingPageMode,
+      conversationPhase: 'greeting' as 'greeting' | 'collecting' | 'generating' | 'optimizing',
+    };
     const files = useStore(workbenchStore.files);
     const [designScheme, setDesignScheme] = useState<DesignScheme>(defaultDesignScheme);
     const actionAlert = useStore(workbenchStore.alert);
@@ -133,8 +144,16 @@ export const ChatImpl = memo(
       (project) => project.id === supabaseConn.selectedProjectId,
     );
     const supabaseAlert = useStore(workbenchStore.supabaseAlert);
-    const { activeProviders, promptId, autoSelectTemplate, contextOptimizationEnabled } = useSettings();
+    const {
+      activeProviders,
+      promptId: defaultPromptId,
+      autoSelectTemplate,
+      contextOptimizationEnabled,
+    } = useSettings();
     const [llmErrorAlert, setLlmErrorAlert] = useState<LlmErrorAlertType | undefined>(undefined);
+
+    // 临时使用默认的 guide prompt，稍后在 useChat 后面动态更新
+    const [currentPromptId, setCurrentPromptId] = useState(isLandingPageMode ? 'landing-page-guide' : defaultPromptId);
     const [model, setModel] = useState(() => {
       const savedModel = Cookies.get('selectedModel');
       return savedModel || DEFAULT_MODEL;
@@ -169,7 +188,7 @@ export const ChatImpl = memo(
       body: {
         apiKeys,
         files,
-        promptId,
+        promptId: currentPromptId,
         contextOptimization: contextOptimizationEnabled,
         chatMode,
         designScheme,
@@ -209,6 +228,97 @@ export const ChatImpl = memo(
       initialMessages,
       initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
     });
+
+    // Landing Page 阶段检测和 prompt 动态切换
+    useEffect(() => {
+      if (!isLandingPageMode) {
+        return;
+      }
+
+      const detectLandingPagePhase = (messages: any[]) => {
+        if (messages.length === 0) {
+          return 'guide';
+        }
+
+        // Check recent messages to determine if information collection is complete
+        const recentMessages = messages.slice(-5);
+        const hasBusinessInfo = recentMessages.some(
+          (m) =>
+            m.content?.toLowerCase().includes('business') ||
+            m.content?.toLowerCase().includes('restaurant') ||
+            m.content?.toLowerCase().includes('massage') ||
+            m.content?.toLowerCase().includes('spa') ||
+            m.content?.toLowerCase().includes('service') ||
+            m.content?.toLowerCase().includes('company') ||
+            m.content?.includes('餐厅') ||
+            m.content?.includes('按摩') ||
+            m.content?.includes('电商'),
+        );
+        const hasDesignInfo = recentMessages.some(
+          (m) =>
+            m.content?.toLowerCase().includes('style') ||
+            m.content?.toLowerCase().includes('design') ||
+            m.content?.toLowerCase().includes('color') ||
+            m.content?.toLowerCase().includes('modern') ||
+            m.content?.toLowerCase().includes('professional') ||
+            m.content?.includes('颜色') ||
+            m.content?.includes('风格') ||
+            m.content?.includes('温馨'),
+        );
+        const hasContactInfo = recentMessages.some(
+          (m) =>
+            m.content?.toLowerCase().includes('phone') ||
+            m.content?.toLowerCase().includes('email') ||
+            m.content?.toLowerCase().includes('address') ||
+            m.content?.toLowerCase().includes('contact') ||
+            m.content?.includes('电话') ||
+            m.content?.includes('地址') ||
+            m.content?.includes('邮箱'),
+        );
+
+        // If user mentions generation, creation, or start keywords, trigger generation phase
+        const shouldGenerate = recentMessages.some((m) => {
+          const content = m.content?.toLowerCase() || '';
+          return (
+            content.includes('generate') ||
+            content.includes('create') ||
+            content.includes('build') ||
+            content.includes('start') ||
+            content.includes('begin') ||
+            content.includes('生成') ||
+            content.includes('创建') ||
+            content.includes('开始制作') ||
+            (hasBusinessInfo && hasDesignInfo && hasContactInfo)
+          );
+        });
+
+        return shouldGenerate ? 'generate' : 'guide';
+      };
+
+      const landingPagePhase = detectLandingPagePhase(messages);
+      const newPromptId = landingPagePhase === 'generate' ? 'landing-page-generator' : 'landing-page-guide';
+
+      if (newPromptId !== currentPromptId) {
+        setCurrentPromptId(newPromptId);
+        console.log(`🚀 Landing Page Phase Switch: ${landingPagePhase}, prompt: ${newPromptId}`);
+        console.log(`📊 Phase Detection Debug:`, {
+          messageCount: messages.length,
+          shouldGenerate: landingPagePhase === 'generate',
+          recentMessages: messages.slice(-3).map(m => ({
+            role: m.role,
+            contentPreview: m.content?.substring(0, 100) + '...'
+          }))
+        });
+      }
+    }, [messages, isLandingPageMode, currentPromptId]);
+
+    // Debug: Monitor currentPromptId changes
+    useEffect(() => {
+      if (isLandingPageMode) {
+        console.log(`📝 Current Prompt ID: ${currentPromptId} (Landing Page Mode: ${isLandingPageMode})`);
+      }
+    }, [currentPromptId, isLandingPageMode]);
+
     useEffect(() => {
       const prompt = searchParams.get('prompt');
 
@@ -232,6 +342,38 @@ export const ChatImpl = memo(
     useEffect(() => {
       chatStore.setKey('started', initialMessages.length > 0);
     }, []);
+
+    // Landing Page 模式初始化
+    useEffect(() => {
+      if (isLandingPageMode && !sessionState.hasMessages) {
+        // 新的 Landing Page 会话 - AI 主动发送欢迎消息
+        const welcomeMessage = {
+          id: `welcome-${Date.now()}`,
+          role: 'assistant' as const,
+          content: `👋 您好！我是您的 Landing Page 设计助手。
+
+我将通过几个简单的问题来了解您的需求，然后为您创建一个专业的 Landing Page。
+
+首先，请告诉我：您的业务类型是什么？比如：
+• 🍽️ 餐厅/美食
+• 🛍️ 电商/零售
+• 🔧 服务业
+• 🎨 个人作品集
+• 💻 SaaS产品
+• 📝 博客/内容
+• 🏢 其他
+
+请简单描述一下您的业务～`,
+          metadata: {
+            isLandingPageGuide: true,
+            phase: 'business-info',
+          },
+        };
+
+        setMessages([welcomeMessage]);
+        setChatStarted(true);
+      }
+    }, [isLandingPageMode, sessionState.hasMessages, setMessages]);
 
     useEffect(() => {
       processSampledMessages({
@@ -697,6 +839,7 @@ export const ChatImpl = memo(
         selectedElement={selectedElement}
         setSelectedElement={setSelectedElement}
         addToolResult={addToolResult}
+        isLandingPageMode={isLandingPageMode}
       />
     );
   },
