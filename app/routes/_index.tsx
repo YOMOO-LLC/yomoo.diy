@@ -4,6 +4,8 @@ import { BaseChat } from '~/components/chat/BaseChat';
 import { Chat } from '~/components/chat/Chat.client';
 import { Header } from '~/components/header/Header';
 import BackgroundRays from '~/components/ui/BackgroundRays';
+import { OnboardingFlow } from '~/components/onboarding/OnboardingFlow';
+import { useSearchParams } from '@remix-run/react';
 
 export const meta: MetaFunction = () => {
   return [
@@ -26,11 +28,25 @@ export const loader = ({ request }: { request: Request }) => {
 
 /**
  * Landing page component for Bolt
+ * Now supports multiple modes:
+ * - onboarding: Guided onboarding flow
+ * - landing-page: Standard landing page with chat
  * Note: Settings functionality should ONLY be accessed through the sidebar menu.
- * Do not add settings button/panel to this landing page as it was intentionally removed
- * to keep the UI clean and consistent with the design system.
  */
 export default function Index() {
+  const [searchParams] = useSearchParams();
+  const mode = searchParams.get('mode');
+
+  // Onboarding mode - full screen dedicated flow
+  if (mode === 'onboarding') {
+    return (
+      <div className="min-h-screen bg-bolt-elements-background-depth-1">
+        <ClientOnly fallback={<div>Loading onboarding...</div>}>{() => <OnboardingFlow />}</ClientOnly>
+      </div>
+    );
+  }
+
+  // Standard landing page mode
   return (
     <div className="flex flex-col h-full w-full bg-bolt-elements-background-depth-1">
       <BackgroundRays />

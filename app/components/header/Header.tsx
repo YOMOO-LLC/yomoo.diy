@@ -9,7 +9,9 @@ import { useSearchParams } from '@remix-run/react';
 export function Header() {
   const chat = useStore(chatStore);
   const [searchParams, setSearchParams] = useSearchParams();
-  const isLandingPageMode = searchParams.get('mode') === 'landing-page';
+  const currentMode = searchParams.get('mode');
+  const isLandingPageMode = currentMode === 'landing-page';
+  const isOnboardingMode = currentMode === 'onboarding';
 
   const handleLandingPageMode = () => {
     setSearchParams({ mode: 'landing-page' });
@@ -17,6 +19,10 @@ export function Header() {
 
   const handleNormalMode = () => {
     setSearchParams({});
+  };
+
+  const handleOnboardingMode = () => {
+    setSearchParams({ mode: 'onboarding', step: '1' });
   };
 
   return (
@@ -35,15 +41,17 @@ export function Header() {
         </a>
       </div>
 
-      {/* Landing Page Mode Toggle - Show when chat hasn't started */}
+      {/* Mode Toggle - Show when chat hasn't started */}
       {!chat.started && (
         <div className="flex items-center gap-3 ml-auto">
-          <div className="flex items-center gap-2 bg-bolt-elements-background-depth-2 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-bolt-elements-background-depth-2 rounded-lg p-1">
             <button
               onClick={handleNormalMode}
               className={classNames('px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200', {
-                'bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary shadow-sm': !isLandingPageMode,
-                'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary': isLandingPageMode,
+                'bg-bolt-elements-background-depth-1 text-bolt-elements-textPrimary shadow-sm':
+                  !isLandingPageMode && !isOnboardingMode,
+                'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary':
+                  isLandingPageMode || isOnboardingMode,
               })}
             >
               💻 开发模式
@@ -60,7 +68,21 @@ export function Header() {
               )}
             >
               <span className="text-lg">🚀</span>
-              Landing Page
+              快速开始
+            </button>
+            <button
+              onClick={handleOnboardingMode}
+              className={classNames(
+                'px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 flex items-center gap-2',
+                {
+                  'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg': isOnboardingMode,
+                  'text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary hover:bg-bolt-elements-background-depth-1':
+                    !isOnboardingMode,
+                },
+              )}
+            >
+              <span className="text-lg">🎯</span>
+              智能引导
             </button>
           </div>
         </div>
